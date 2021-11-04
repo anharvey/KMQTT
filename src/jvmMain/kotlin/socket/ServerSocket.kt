@@ -12,6 +12,7 @@ import socket.tcp.Socket
 import socket.udp.UDPSocket
 import java.net.InetAddress
 import java.net.InetSocketAddress
+import java.net.StandardSocketOptions
 import java.nio.ByteBuffer
 import java.nio.channels.*
 
@@ -48,12 +49,15 @@ actual open class ServerSocket actual constructor(
             clusteringSocket.register(selector, SelectionKey.OP_ACCEPT)
 
             if (!broker.cluster.dnsDiscovery) {
+                val discoveryAddress = broker.cluster.discoveryAddress ?: broker.host
                 discoverySocket.configureBlocking(false)
-                discoverySocket.bind(InetSocketAddress(broker.host, broker.cluster.discoveryPort))
+                discoverySocket.bind(InetSocketAddress(discoveryAddress, broker.cluster.discoveryPort))
+                discoverySocket.setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                discoverySocket.setOption(StandardSocketOptions.SO_BROADCAST, true)
                 val datagramKey = discoverySocket.register(selector, SelectionKey.OP_READ)
                 val clusterConnection = ClusterDiscoveryConnection(UDPSocket(datagramKey), broker)
                 datagramKey.attach(clusterConnection)
-                clusterConnection.sendDiscovery(broker.cluster.discoveryPort)
+                clusterConnection.sendDiscovery(broker.cluster.broadcastAddress, broker.cluster.discoveryPort)
             } else {
                 val localAddress = InetAddress.getLocalHost().hostAddress
                 Lookup("tasks." + broker.cluster.dnsName, Type.A).run()?.forEach {

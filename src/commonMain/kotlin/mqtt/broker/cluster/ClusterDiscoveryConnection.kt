@@ -17,9 +17,9 @@ class ClusterDiscoveryConnection(private val socket: UDPSocket, private val brok
         }
     }
 
-    fun sendDiscovery(port: Int) {
+    fun sendDiscovery(address: String, port: Int) {
         val packet = ProtoBuf.encodeToByteArray(DiscoveryPacket.serializer(), DiscoveryPacket(broker.cluster!!.name))
             .toUByteArray()
-        socket.send(packet, "255.255.255.255", port)
+        socket.send(packet, address, port)
     }
 }

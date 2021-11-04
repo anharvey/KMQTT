@@ -7,5 +7,7 @@ data class ClusterSettings(
     val tcpPort: Int = 22222,
     val dnsDiscovery: Boolean = true,
     val dnsName: String = "kmqtt_broker",
+	val broadcastAddress: String = "255.255.255.255",
+    val discoveryAddress: String? = null,
     val discoveryPort: Int = 22223
 )

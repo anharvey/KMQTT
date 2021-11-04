@@ -133,7 +133,7 @@ actual open class ServerSocket actual constructor(
                     prepareDatagramSocket(discoverySocket, cluster.discoveryPort)
                     val clusterConnection = ClusterDiscoveryConnection(UDPSocket(discoverySocket), broker)
                     clients[discoverySocket] = clusterConnection
-                    clusterConnection.sendDiscovery(cluster.discoveryPort)
+                    clusterConnection.sendDiscovery(cluster.broadcastAddress, cluster.discoveryPort)
                 } else {
                     // TODO dns lookup
                     // broker.addClusterConnection(address)
